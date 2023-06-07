@@ -4,6 +4,7 @@
  * Created: 5/6/2023 15:15:20
  *  Author: Infinio
  */ 
+#include "timer.h"
 
 void TimerInit(void){
 		

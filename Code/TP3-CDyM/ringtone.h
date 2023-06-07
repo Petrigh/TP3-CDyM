@@ -50,6 +50,6 @@ const unsigned int note[4][12] =
 
 void sound(unsigned int, unsigned int);
 void play_song(char*);
-int tocar(void);
+int tocar(char);
 
 #endif /* RINGTONE_H_ */

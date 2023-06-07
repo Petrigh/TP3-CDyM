@@ -1,5 +1,112 @@
 
+#include "uart.h"
  
+ void UART_Update(void){
+	 char dato;
+	 if (TXindice_lectura < TXindice_escritura) //Hay byte en el buffer TX para transmitir?
+	 {
+		 UART_Send_Char ( TX_buffer [ TXindice_lectura ] );
+		 TXindice_lectura++;
+	 }
+	 else
+	 { //No hay dato disponibles para enviar
+		 TXindice_lectura = 0;
+		 TXindice_escritura = 0;
+	 }
+	 
+	 //Se ha recibido algún byte?
+	 if ( UART_Receive_data ( &dato ) != 0)
+	 { //Byte recibido. Escribir byte en buffer de entrada
+		 if ( RXIndex_escritura < RX_BUFFER_LENGTH)
+		 {
+			RX_buffer [ RXIndex_escritura ] = dato; //Guardar dato en buffer
+			RXIndex_escritura++; //Inc sin desbordar buffer 
+		 }
+		 else
+		 {
+			 Error_code = ERROR_UART_FULL_BUFF;
+		 }
+	 } 
+ }
+ 
+ void UART_Write_String_To_Buffer (const char* STR_PTR)
+ {
+	 char i = 0;
+	 while ( STR_PTR[i] != '\0')
+	 {
+		 UART_Write_Char_To_Buffer( STR_PTR[i] );
+		 i++;
+	 }
+ }
+ 
+ void UART_Write_Char_To_Buffer (const char data)
+ {
+	 if (TXindice_escritura < TX_BUFFER_LENGTH)
+	 {
+		 TX_buffer [ TXindice_escritura ] = data;
+		 TXindice_escritura++;
+	 }
+	 else
+	 {
+		 //Write buffer is full
+		 Error_code = ERROR_UART_FULL_BUFF;
+	 }
+	 
+ }  
+
+ 
+ char UART_Get_Char_From_Buffer (char* ch)
+ {
+	//Hay nuevo dato en el buffer?
+	if ( RXIndex_lectura < RXIndex_escritura )
+	{
+		*ch = RX_buffer [ RXIndex_lectura ];
+		RXIndex_lectura++;
+		return 1; //Hay nuevo dato
+	}
+	else
+	{
+		RXIndex_lectura = 0;
+		RXIndex_escritura = 0;
+		return 0; //No hay	
+	}
+ }
+
+ 
+ void UART_Init ( int Baud )
+ {
+	 //Implementar xd
+ }
+
+
+ void UART_Send_Char ( char dato )
+ {
+	 long Timeout = 0;
+	 while(( ++Timeout ) && ((UCSR0A & (1 << UDRE0)) == 0));
+	 if ( Timeout != 0 )
+		UDR0 = dato;
+	 else{
+		// TX_UART did not respond - error 
+	 }
+ }
+ 
+ void UART_Receive_data ( char *dato )
+ {
+	 if ( UCSR0A & (1 << RXC0) )
+	 {
+		 *dato = UDR0;
+		 return 1;
+	 }
+	 else
+	 {
+		 return 0;
+	 }
+ }
+ 
+ 
+ 
+ 
+ /*
  //1-transmitir G. Ver silulador as7, tregistros uart y tiempo que tarda en transmitir un caracter.
 
 #include <avr/io.h>
@@ -21,7 +128,7 @@
  }
  
  
- /*
+ 
  //2-LOOPBACK con polling 
  #include <avr/io.h>
  #define F_CPU 16000000UL		// 16 MHz
