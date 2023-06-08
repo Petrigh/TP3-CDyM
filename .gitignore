@@ -52,7 +52,7 @@ Mkfile.old
 dkms.conf
 
 #Added by Petrigh
-.vs/
 Debug/
 Project Backups/
 Proteus/*.workspace
+Code/TP3-CDyM/.vs/
