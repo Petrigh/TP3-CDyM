@@ -16,6 +16,6 @@
 #include "avr/interrupt.h"
 #define F_CPU 16000000UL
 
-
-
+const char *menu[] PROGMEM = {"\nOpciones disponibles:\n", "1. PLAY: Reproducir canción\n", "2. STOP: Detener reproducción\n", "3. NUM: Seleccionar número de canción\n", "4. RESET: Reiniciar sisteman\n", "Ingrese el número de opción: "};
+const char *menuSwitch[] PROGMEM = {"Reproduciendo ", "Reproduccion detenida\n", "Ingrese el número de canción a seleccionar: ", "Reiniciando el sistema...\n", "Comando no válido\n"};
 #endif /* MAIN_H_ */
