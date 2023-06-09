@@ -131,4 +131,3 @@ void SerialPort_send_int16_t(int val,unsigned int field_length)
 	SerialPort_Send_Data('0'+str[i]);
 	}
 }
-
