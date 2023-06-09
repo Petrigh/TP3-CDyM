@@ -10,7 +10,7 @@ int main(void)
 	// Declaraciones de variables
 	bool mostrarBienvenida = false;
 	uint8_t opcion;
-	uint8_t idCancion = 0;
+	uint8_t idCancion = 1;
 	ringtonesInit(); //Este guarda las cosas en ROM
 	
 	//Inicializo Timer0 y Timer1
@@ -38,7 +38,7 @@ int main(void)
 
 		switch (opcion) {
 			case 1: {
-				play_song(pgm_read_word(&songList[idCancion]));
+				play_song(pgm_read_word(&songList[idCancion-1]));
 				break;
 			}
 			case 2: {
