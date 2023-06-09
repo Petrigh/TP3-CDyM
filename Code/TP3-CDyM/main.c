@@ -1,7 +1,7 @@
 
 //#include "main.h"
 #include "main.h"
-#include "serialPort.h"
+#include "uart.h"
 #include "timer.h"
 #include "ringtone.h"
 
@@ -15,7 +15,7 @@ int main(void)
 	TimerInit();
 
 	//Inicializo UART (hacerlo xd)
-	
+	UART_Init();
 	//Habilito la m?scara de interrupciones
 	
 	sei();
