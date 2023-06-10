@@ -12,10 +12,14 @@ int main(void)
 	// Inicializo UART
 	UART_Init();
 	
-	// Habilito la máscara de interrupciones
+	// Habilito la mï¿½scara de interrupciones
 	sei();
 
-	while (1) {
+	while (true) {
+
+		
+		SEOS_Dispatch_Tasks();
+		
 		if (!mostrarBienvenida) {
 			printSongList();
 			mostrarBienvenida = true;
@@ -53,7 +57,7 @@ int main(void)
 			default:
 			printf_P(pgm_read_word(&menuSwitch[1]));
 			break;
-		}
+		} */
 	}
 
 	return 0;
