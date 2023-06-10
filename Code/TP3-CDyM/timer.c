@@ -6,6 +6,8 @@
  */ 
 #include "timer.h"
 
+static uint8_t cont_act = 0;
+
 void TimerInit(void){
 		
 		// ------------------------ Timer 0 ------------------------
@@ -34,5 +36,9 @@ ISR (TIMER0_COMPA_vect) // ISR para la interrupci?n de comparaci?n del Timer 0
 	{
 		TCCR1A=0;	// Desactivo el timer 1
 		sound_playing = 0;                  // Borro el flag para avisar que no hay una nota sonando
+	}
+	
+	if (++cont_act == 5){
+		SEOS_Schedule_Tasks();
 	}
 }

@@ -10,6 +10,7 @@
 #define TIMER_H_
 
 #include "avr/interrupt.h"
+#include "ringtone.h"
 
 unsigned int duration_timer;
 volatile unsigned int sound_playing=0;

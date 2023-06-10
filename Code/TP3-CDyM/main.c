@@ -23,6 +23,10 @@ int main(void)
 	sei();
 
 	while (true) {
+		
+		SEOS_Dispatch_Tasks();
+		
+		/*
 		if (!mostrarBienvenida) {
 			printSongList();
 			mostrarBienvenida = true;
@@ -60,7 +64,7 @@ int main(void)
 			default:
 			printf("Comando no válido\n");
 			break;
-		}
+		} */
 	}
 	return 0;
 }

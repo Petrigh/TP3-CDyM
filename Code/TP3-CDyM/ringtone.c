@@ -8,7 +8,6 @@
 -----------------------------------------------------------*/
 
 #include "ringtone.h"
-#include "timer.h"
 #include <avr/pgmspace.h>  // Libreria para guardar en ROM
 #include <avr/io.h>        // Required library for ATmega328P
 
