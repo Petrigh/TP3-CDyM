@@ -25,8 +25,12 @@
 		 else
 		 {
 			 Error_code = ERROR_UART_FULL_BUFF;
+			 UART_Write_String_To_Buffer("Error: Buffer del Uart lleno, se perdieron datos.\r\n");
 		 }
-	 } 
+	 }
+	 else {
+		 Error_code = 0;  // Reset error code if no data is received
+	 }
  }
  
  void UART_Write_String_To_Buffer (const char* STR_PTR)
@@ -93,7 +97,7 @@
 	 }
  }
  
- void UART_Receive_data ( char *dato )
+ uint8_t UART_Receive_data ( char *dato )
  {
 	 if ( UCSR0A & (1 << RXC0) )
 	 {

@@ -28,6 +28,8 @@ void TimerInit(void){
 }
 
 
+//-----------------EN LUGAR DE USAR EL TIMER, PODEMOS USAR LA INTERUPCION DE USART (HECHAS MAS ABAJO)
+/*
 // Control de la duraci?n del sonido
 ISR (TIMER0_COMPA_vect) // ISR para la interrupci?n de comparaci?n del Timer 0
 {
@@ -41,4 +43,13 @@ ISR (TIMER0_COMPA_vect) // ISR para la interrupci?n de comparaci?n del Timer 0
 	if (++cont_act == 5){
 		SEOS_Schedule_Tasks();
 	}
+}
+*/
+
+ISR(USART_TX_vect) {
+	UART_Update();
+}
+
+ISR(USART_RX_vect) {
+	UART_Update();
 }
