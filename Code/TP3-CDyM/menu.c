@@ -6,6 +6,10 @@
  */ 
 #include "menu.h"
 
+PGM_P menuPtr;
+PGM_P menuSwitchPtr;
+PGM_P songPtr;
+
 void menuInit(void){
 	uint8_t idCancion = 1;
 	bool mostrarBienvenida = false;
@@ -34,38 +38,50 @@ void MENU_Update(void){
 		printSongList();
 		mostrarBienvenida = true;
 	}
-
-	UART_Write_String_To_Buffer(pgm_read_word(&menu[0]));
-	UART_Write_String_To_Buffer(pgm_read_word(&menu[1]));
-	UART_Write_String_To_Buffer(pgm_read_word(&menu[2]));
-	UART_Write_String_To_Buffer(pgm_read_word(&menu[3]));
-	UART_Write_String_To_Buffer(pgm_read_word(&menu[4]));
-	UART_Write_String_To_Buffer(pgm_read_word(&menu[5]));
+	
+	memcpy_P(&menuPtr, &menu[0], sizeof(PGM_P));
+	UART_Write_String_To_Buffer(menuPtr);
+	memcpy_P(&menuPtr, &menu[1], sizeof(PGM_P));
+	UART_Write_String_To_Buffer(menuPtr);
+	memcpy_P(&menuPtr, &menu[2], sizeof(PGM_P));
+	UART_Write_String_To_Buffer(menuPtr);
+	memcpy_P(&menuPtr, &menu[3], sizeof(PGM_P));
+	UART_Write_String_To_Buffer(menuPtr);
+	memcpy_P(&menuPtr, &menu[4], sizeof(PGM_P));
+	UART_Write_String_To_Buffer(menuPtr);
+	memcpy_P(&menuPtr, &menu[5], sizeof(PGM_P));
+	UART_Write_String_To_Buffer(menuPtr);
 	while (!UART_Get_Char_From_Buffer(opcion));
 
 	switch (*opcion) {
 		case 1: {
-			UART_Write_String_To_Buffer(pgm_read_word(&menuSwitch[0]));
-			play_song(pgm_read_word(&songList[idCancion - 1]));
+			memcpy_P(&menuSwitchPtr, &menuSwitch[0], sizeof(PGM_P));
+			UART_Write_String_To_Buffer(menuSwitchPtr);
+			memcpy_P(&songPtr, &songList[idCancion-1], sizeof(PGM_P));
+			play_song(songPtr);
 			break;
 		}
 		case 2: {
-			UART_Write_String_To_Buffer(pgm_read_word(&menuSwitch[1]));
+			memcpy_P(&menuSwitchPtr, &menuSwitch[1], sizeof(PGM_P));
+			UART_Write_String_To_Buffer(menuSwitchPtr);
 			break;
 		}
 		case 3: {
-			UART_Write_String_To_Buffer(pgm_read_word(&menuSwitch[2]));
+			memcpy_P(&menuSwitchPtr, &menuSwitch[2], sizeof(PGM_P));
+			UART_Write_String_To_Buffer(menuSwitchPtr);
 			while (!UART_Get_Char_From_Buffer(opcion));
 			break;
 		}
 		case 4: {
-			printf_P(pgm_read_word(&menuSwitch[3]));
+			memcpy_P(&menuSwitchPtr, &menuSwitch[3], sizeof(PGM_P));
+			UART_Write_String_To_Buffer(menuSwitchPtr);
 			mostrarBienvenida = false;
 			idCancion = 0;
 			break;
 		}
 		default:
-		printf_P(pgm_read_word(&menuSwitch[4]));
+		memcpy_P(&menuSwitchPtr, &menuSwitch[4], sizeof(PGM_P));
+		UART_Write_String_To_Buffer(menuSwitchPtr);
 		break;
 	}	
 }

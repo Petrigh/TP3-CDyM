@@ -19,11 +19,11 @@
 #include "uart.h"
 
 #define F_CPU 16000000UL
-#define MAX_SONGS 8
+#define MAX_SONGS 5
 
-const char PROGMEM bienvenida[];
-const char PROGMEM songNames[MAX_SONGS][20];
-const char PROGMEM songList[MAX_SONGS][200];
+const char bienvenida[] PROGMEM;
+const char songNames[MAX_SONGS][20] PROGMEM;
+const char songList[MAX_SONGS][200] PROGMEM;
 
 void sound(unsigned int, unsigned int);
 void play_song(char*);

@@ -22,8 +22,9 @@ uint8_t idCancion;
 char *opcion;
 
 const char PROGMEM menu[6][50];
-
 const char PROGMEM menuSwitch[5][50];
 
+void menuInit(void);
+void MENU_Update(void);
 
 #endif /* MENU_H_ */
