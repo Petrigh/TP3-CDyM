@@ -1,3 +1,5 @@
+#include "main.h"
+
 int main(void)
 {
 	// Declaraciones de variables
@@ -18,7 +20,7 @@ int main(void)
 	while (true) {
 
 		
-		SEOS_Dispatch_Tasks();
+		//SEOS_Dispatch_Tasks();
 		
 		if (!mostrarBienvenida) {
 			printSongList();

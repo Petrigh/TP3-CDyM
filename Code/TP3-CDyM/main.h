@@ -4,8 +4,10 @@
 #include "stdio.h"
 #include "stdlib.h"
 #include "stdint.h"
+#include <stdbool.h>
 #include <avr/io.h>
 #include "avr/interrupt.h"
+#include <ringtone.h>
 #define F_CPU 16000000UL
 
 const char menu[][50] PROGMEM = {

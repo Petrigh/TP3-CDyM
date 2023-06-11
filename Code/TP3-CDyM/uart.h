@@ -27,7 +27,7 @@ char UART_Get_Char_From_Buffer(char * ch);
 
 void UART_Init ();
 void UART_Send_Char(char dato);
-char UART_Receive_data (char *dato);
+uint8_t UART_Receive_data (char *dato);
 
 
 
