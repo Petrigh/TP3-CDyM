@@ -12,6 +12,9 @@ int main(void)
 	// Inicializo UART
 	UART_Init();
 	
+	// Inicializo el Menu
+	menuInit();
+	
 	// Habilito la m�scara de interrupciones
 	sei();
 

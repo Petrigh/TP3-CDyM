@@ -21,12 +21,13 @@
 #define F_CPU 16000000UL
 #define MAX_SONGS 5
 
-const char bienvenida[] PROGMEM;
+const char bienvenida[1] PROGMEM;
 const char songNames[MAX_SONGS][20] PROGMEM;
 const char songList[MAX_SONGS][200] PROGMEM;
 
 void sound(unsigned int, unsigned int);
 void play_song(char*);
 int tocar(char);
+void printSongList();
 
 #endif /* RINGTONE_H_ */

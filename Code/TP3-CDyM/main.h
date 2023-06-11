@@ -11,5 +11,6 @@
 #include "timer.h"
 #include "ringtone.h"
 #include "seos.h"
+#include "menu.h"
 #define F_CPU 16000000UL
 #endif /* MAIN_H_ */
