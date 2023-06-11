@@ -4,6 +4,7 @@
 #include "uart.h"
 #include "timer.h"
 #include "ringtone.h"
+#include "seos.h"
 
 int main(void)
 {

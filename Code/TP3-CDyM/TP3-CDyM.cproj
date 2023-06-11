@@ -120,6 +120,12 @@
     <Compile Include="ringtone.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="seos.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="seos.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="serialPort.c">
       <SubType>compile</SubType>
     </Compile>
