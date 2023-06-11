@@ -195,9 +195,10 @@ void ringtonesInit() {
 }
 
 void printSongList() {
-	printf("Número de canciones almacenadas: %d\n", MAX_SONGS);
-	printf("Lista de canciones:\n");
+	UART_Write_String_To_Buffer("Número de canciones almacenadas: ");
+	UART_Write_Char_To_Buffer(MAX_SONGS);
+	UART_Write_String_To_Buffer("Lista de canciones:\n");
 	for (int i = 0; i < MAX_SONGS; i++) {
-		printf("%s\n", pgm_read_word(&songNames[i]));
+		UART_Write_String_To_Buffer(pgm_read_word(&songNames[i]));
 	}
 }
