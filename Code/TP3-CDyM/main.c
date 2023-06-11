@@ -1,5 +1,14 @@
-#include "main.h"
+<<<<<<< HEAD
 
+//#include "main.h"
+#include "main.h"
+#include "uart.h"
+#include "timer.h"
+#include "ringtone.h"
+#include "seos.h"
+
+=======
+>>>>>>> c969e43a6451f4bfccf76fb79adcc66920ae6765
 int main(void)
 {
 	// Declaraciones de variables
