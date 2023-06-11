@@ -11,14 +11,14 @@
 #define UART_H_
 
 #define BR9600 (0x67) // 0x67=103 configura BAUDRATE=9600@16MHz
- #define ERROR_UART_FULL_BUFF 1
-
-uint8_t TX_BUFFER_LENGTH = 8, RX_BUFFER_LENGTH = 8;
+#define ERROR_UART_FULL_BUFF 1
+#define TX_BUFFER_LENGTH 8
+#define RX_BUFFER_LENGTH 8
 static unsigned char TXindice_lectura = 0, TXindice_escritura = 0;
 static unsigned char RXIndex_lectura = 0, RXIndex_escritura = 0;
 static unsigned char TX_buffer [ TX_BUFFER_LENGTH ];
 static unsigned char RX_buffer [ RX_BUFFER_LENGTH ];
-uint8_t Error_code= 0;
+uint8_t Error_code;
 
 void UART_Update(void);
 void UART_Write_String_To_Buffer(const char* STR_PTR);

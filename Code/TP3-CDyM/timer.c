@@ -9,6 +9,8 @@
 static uint8_t cont_act = 0;
 
 void TimerInit(void){
+	
+		volatile unsigned int sound_playing = 0;
 		
 		// ------------------------ Timer 0 ------------------------
 		

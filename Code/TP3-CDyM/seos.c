@@ -6,7 +6,6 @@
  */ 
 
 #include "seos.h"
-#include "menu.h"
 
 static uint8_t UART_flag = 0;
 static uint8_t MENU_flag = 0;
@@ -23,6 +22,6 @@ void SEOS_Dispatch_Tasks () {
 	}
 	if (MENU_flag){
 		MENU_flag = 0;
-		MENU_Command_Update();
+		MENU_Update();
 	}
 }

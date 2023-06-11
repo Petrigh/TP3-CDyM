@@ -13,7 +13,7 @@
 #include "ringtone.h"
 
 unsigned int duration_timer;
-volatile unsigned int sound_playing=0;
+volatile unsigned int sound_playing;
 
 void TimerInit(void);
 
