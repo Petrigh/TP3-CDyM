@@ -8,11 +8,29 @@
 -----------------------------------------------------------*/
 
 #include "ringtone.h"
-#include <avr/pgmspace.h>  // Libreria para guardar en ROM
-#include <avr/io.h>        // Required library for ATmega328P
+// Mensaje de bienvenida
 
-PGM_P songNamePtr;
-PGM_P bienvenidaPtr;
+const char PROGMEM bienvenida[13] = "Willkommen!\n";
+//Lista de nombres de las canciones
+const char PROGMEM songNames[MAX_SONGS][18] = {
+	"1-Megalovania   \n", 
+	"2-Doom Theme    \n", 
+	"3-I'm Blue      \n", 
+	"4-Tetris Theme  \n", 
+	"5-Among Us Theme\n"};
+// Colecci?n de m?sica RTTL
+const char PROGMEM songList[MAX_SONGS][200] = {
+	"Megalovania:d=16,o=5,b=200:d, d, d6, p, a, 8p, g#, p, g, p, f, p, d, f, g, c, c, d6, p, a, 8p, g#, p, g, p, f, p, d, f, g, b4, b4, d6, p, a, 8p, g#, p, g, p, f, p, d, f, g, a#4, a#4, d6, p, a, 8p, g#, p, g, p, f, p, d, f, g",
+
+	"Doom:d=32,o=5,b=56:f,f,f6,f,f,d#6,f,f,c#6,f,f,b,f,f,c6,c#6,f,f,f6,f,f,d#6,f,f,c#6,f,f,8b.,f,f,f6,f,f,d#6,f,f,c#6,f,f,b,f,f,c6,c#6,f,f,f6,f,f,d#6,f,f,c#6,f,f,8b.,a#,a#,a#6,a#,a#,g#6,a#,a#,f#6,a#,a#,e6,a#,a#,f6,f#6,a#,a#,a#6,a#,a#,g#6,a#,a#,f#6,a#,a#,8e6",
+	
+	"ImBlue:d=4,o=6,b=63:16b,16d#,16g#,16b,16c#7,16f#,16a#,8b,16g#,16b,16d#7,16e7,16g#,16d#7,16c#7,16b,16d#,16g#,16b,16c#7,16f#,16a#,8b,16g#,16b,16d#7,16e7,16g#,16d#7,16c#7,16b,16d#,16g#,16b,16c#7,16f#,16a#,8b,16g#,16b,16d#7,16e7,16g#,16d#7,16c#7,16b,16d#,16g#,16b,16a#,16c#,16f#,8g#,16b5,16f#,8g#,16f#,16g#,16a#,16b,16d#,16g#,16b,16c#7,16f#,16a#,8b,16g#",
+	
+	"Tetris:d=4,o=6,b=80:8f7,16c7,16c#7,16d#7,32f7,32d#7,16c#7,16c7,8a#,16a#,16c#7,8f7,16d#7,16c#7,8c.7,16c#7,8d#7,8f7,8c#7,8a#,a#,8d#7,16f#7,8a#7,16g#7,16f#7,8f.7,16c#7,8f7,16d#7,16c#7,8c7,16c7,16c#7,8d#7,8f7,8c#7,8a#,8a#",
+	
+	"AmongUs:d=4,o=5,b=100:8c6,8d#6,8f6,8f#6,8f6,8d#6,8c6,4p,16a#5,16d6,16c6,16p,4p,8a#4,8c5,8p,8c6,8d#6,8f6,8f#6,8f6,8d#6,8f#6,4p,8p,12f#6,12f6,12d#6,12f#6,12f6,12d#6,8c5,8p"
+};
+
 // La siguiente matriz almacena las frecuencias de las notas musicales
 const unsigned int note[4][12] =
 {   // C    C#    D     D#    E     F     F#    G     G#    A     A#    B
@@ -21,26 +39,7 @@ const unsigned int note[4][12] =
 	{1047,1109,1175,1244,1319,1397,1480,1568,1660,1760,1865,1976},// 6ta octava
 	{2093,2218,2349,2489,2637,2794,2960,3136,3320,3520,3728,3951}  // 7ma octava
 };
-
-void ringtoneInit(void){
-	// Mensaje de bienvenida
-	const char bienvenida[] PROGMEM = "Willkommen!";
-	//Lista de nombres de las canciones
-	const char songNames[MAX_SONGS][20] PROGMEM = {"1-Megalovania", "5-Doom Theme", "6-I'm Blue", "7-Tetris Theme", "8-Among Us Theme"};
-	// Colecci?n de m?sica RTTL
-	const char songList[MAX_SONGS][200] PROGMEM = {
-		"Megalovania:d=16,o=5,b=200:d, d, d6, p, a, 8p, g#, p, g, p, f, p, d, f, g, c, c, d6, p, a, 8p, g#, p, g, p, f, p, d, f, g, b4, b4, d6, p, a, 8p, g#, p, g, p, f, p, d, f, g, a#4, a#4, d6, p, a, 8p, g#, p, g, p, f, p, d, f, g",
-
-		"Doom:d=32,o=5,b=56:f,f,f6,f,f,d#6,f,f,c#6,f,f,b,f,f,c6,c#6,f,f,f6,f,f,d#6,f,f,c#6,f,f,8b.,f,f,f6,f,f,d#6,f,f,c#6,f,f,b,f,f,c6,c#6,f,f,f6,f,f,d#6,f,f,c#6,f,f,8b.,a#,a#,a#6,a#,a#,g#6,a#,a#,f#6,a#,a#,e6,a#,a#,f6,f#6,a#,a#,a#6,a#,a#,g#6,a#,a#,f#6,a#,a#,8e6",
-	
-		"ImBlue:d=4,o=6,b=63:16b,16d#,16g#,16b,16c#7,16f#,16a#,8b,16g#,16b,16d#7,16e7,16g#,16d#7,16c#7,16b,16d#,16g#,16b,16c#7,16f#,16a#,8b,16g#,16b,16d#7,16e7,16g#,16d#7,16c#7,16b,16d#,16g#,16b,16c#7,16f#,16a#,8b,16g#,16b,16d#7,16e7,16g#,16d#7,16c#7,16b,16d#,16g#,16b,16a#,16c#,16f#,8g#,16b5,16f#,8g#,16f#,16g#,16a#,16b,16d#,16g#,16b,16c#7,16f#,16a#,8b,16g#",
-	
-		"Tetris:d=4,o=6,b=80:8f7,16c7,16c#7,16d#7,32f7,32d#7,16c#7,16c7,8a#,16a#,16c#7,8f7,16d#7,16c#7,8c.7,16c#7,8d#7,8f7,8c#7,8a#,a#,8d#7,16f#7,8a#7,16g#7,16f#7,8f.7,16c#7,8f7,16d#7,16c#7,8c7,16c7,16c#7,8d#7,8f7,8c#7,8a#,8a#",
-	
-		"AmongUs:d=4,o=5,b=100:8c6,8d#6,8f6,8f#6,8f6,8d#6,8c6,4p,16a#5,16d6,16c6,16p,4p,8a#4,8c5,8p,8c6,8d#6,8f6,8f#6,8f6,8d#6,8f#6,4p,8p,12f#6,12f6,12d#6,12f#6,12f6,12d#6,8c5,8p"
-	};
-}
-unsigned char duration,octave;
+char duration,octave;
 unsigned int tempo;
 
 // Saco el sonido por el PIN5 del PORTD: freq en Hz,dur en ms
@@ -200,13 +199,11 @@ void play_song(char *song)
 }
 
 void printSongList() {
-	memcpy_P(&bienvenidaPtr, &bienvenida, sizeof(PGM_P));
-	UART_Write_String_To_Buffer(bienvenidaPtr);
-	UART_Write_String_To_Buffer("Número de canciones almacenadas: ");
-	UART_Write_Char_To_Buffer(MAX_SONGS);
-	UART_Write_String_To_Buffer("Lista de canciones:\n");
-	for (int i = 0; i < MAX_SONGS; i++) {
-		memcpy_P(&songNamePtr, &songNames[i], sizeof(PGM_P));
-		UART_Write_String_To_Buffer(songNamePtr);
-	}
+	
+	for(uint8_t i=0;i<13;i++)
+		UART_Write_Char_To_Buffer(pgm_read_byte(&bienvenida[i]));
+		
+	for(uint8_t j=0;j<5;j++)
+		for(uint8_t i=0;i<18;i++)
+			UART_Write_Char_To_Buffer(pgm_read_byte(&songNames[j][i]));
 }

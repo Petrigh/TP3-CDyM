@@ -12,8 +12,8 @@
 
 #define BR9600 (0x67) // 0x67=103 configura BAUDRATE=9600@16MHz
 #define ERROR_UART_FULL_BUFF 1
-#define TX_BUFFER_LENGTH 8
-#define RX_BUFFER_LENGTH 8
+#define TX_BUFFER_LENGTH 255
+#define RX_BUFFER_LENGTH 255
 static unsigned char TXindice_lectura = 0, TXindice_escritura = 0;
 static unsigned char RXIndex_lectura = 0, RXIndex_escritura = 0;
 static unsigned char TX_buffer [ TX_BUFFER_LENGTH ];
