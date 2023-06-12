@@ -5,7 +5,8 @@
 	 char dato;
 	 if (TXindice_lectura < TXindice_escritura) //Hay byte en el buffer TX para transmitir?
 	 {
-		 UART_Send_Char ( TX_buffer [ TXindice_lectura ] );
+		 //UART_Send_Char ( TX_buffer [ TXindice_lectura ] );
+		 UDR0 = TX_buffer[TXindice_lectura];
 		 TXindice_lectura++;
 	 }
 	 else
@@ -13,7 +14,7 @@
 		 TXindice_lectura = 0;
 		 TXindice_escritura = 0;
 	 }
-	 
+	 /*
 	 //Se ha recibido algún byte?
 	 if ( UART_Receive_data ( &dato ) != 0)
 	 { //Byte recibido. Escribir byte en buffer de entrada
@@ -31,6 +32,7 @@
 	 else {
 		 Error_code = 0;  // Reset error code if no data is received
 	 }
+	 */
  }
  
  void UART_Write_String_To_Buffer (const char* STR_PTR)
@@ -83,6 +85,7 @@
 	 SerialPort_Init(BR9600); 		// Inicializo formato 8N1 y BAUDRATE = 9600bps
 	 SerialPort_TX_Enable();			// Activo el Transmisor del Puerto Serie
 	 SerialPort_RX_Enable();			// Activo el Receptor del Puerto Serie
+	 
 	 Error_code = 0;
  }
 

@@ -45,6 +45,7 @@ void MENU_Update(void){
 		printSongList();
 		mostrarBienvenida = true;
 	}
+	SerialPort_TX_Interrupt_Enable();
 	for(uint8_t j=0;j<5;j++)
 		for(uint8_t i=0;i<37;i++)
 			UART_Write_Char_To_Buffer(pgm_read_byte(&menu[j][i]));

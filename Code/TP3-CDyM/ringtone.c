@@ -206,4 +206,5 @@ void printSongList() {
 	for(uint8_t j=0;j<5;j++)
 		for(uint8_t i=0;i<18;i++)
 			UART_Write_Char_To_Buffer(pgm_read_byte(&songNames[j][i]));
+			
 }
