@@ -70,8 +70,6 @@ void opcionMenu(char opcion){
 					SerialPort_Wait_For_TX_Buffer_Free();
 				}
 				eleccionMenu(theme);
-				
-				SerialPort_Send_String("\n\n\n\n\n ");
 				mostrarMenu=1;
 			}
 		break;
@@ -90,7 +88,6 @@ void opcionMenu(char opcion){
 		break;
 		
 		case 'n':
-			SerialPort_Send_String("\n\n\n\n\n ");
 			printSongList();
 			i= 0;
 			c = pgm_read_byte(menuSwitch3 + i);
@@ -111,7 +108,6 @@ void opcionMenu(char opcion){
 			}
 			mostrarMenu=1;
 			UDR0=0;
-			SerialPort_Send_String("\n\n\n\n\n\n\n\n\n\n\n\n ");
 		break;
 		
 		case 'r':
@@ -128,7 +124,6 @@ void opcionMenu(char opcion){
 			mostrarBienvenida=1;
 			mostrarMenu=1;
 			_delay_ms(3000);		
-			SerialPort_Send_String("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n ");
 		break;
 		
 		default:

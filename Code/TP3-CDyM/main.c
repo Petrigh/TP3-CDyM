@@ -58,7 +58,4 @@
  // Rutina de Servicio de Interrupción de Byte Recibido
  ISR(USART_RX_vect){
 	 RX_Buffer = UDR0; //la lectura del UDR borra flag RXC
-	 if(RX_Buffer == 's'){
-		 sound_playing = 0;
-	}
  }
