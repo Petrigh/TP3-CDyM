@@ -16,6 +16,7 @@
 	// Interrupciones del Microcontrolador
 	#include <avr/interrupt.h>
 	
+	volatile char RX_Buffer;
 	// -------- Prototipos de funciones Publicas ---------------
 	
 	// Inicializacion de Puerto Serie

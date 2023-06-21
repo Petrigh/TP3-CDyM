@@ -1,92 +1,146 @@
-/*
- * menu.c
- *
- * Created: 11/6/2023 13:21:50
- *  Author: Infinio
- */ 
+#define F_CPU 16000000UL		// 16 MHz
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <avr/io.h>
+#include <avr/interrupt.h>
+#include <util/delay.h>
+#include "avr/pgmspace.h"
+#include "serialPort.h"
+#include "ringtones.h"
 #include "menu.h"
 
+//Menu
+const char PROGMEM menu[] = "\nOpciones disponibles:\np. PLAY: Reproducir canción\ns. STOP: Detener reproducción\nn. NUM: Seleccionar número de canción\nr. RESET: Reiniciar sistema\nIngrese el número de opción: \n";
+//Feedback
+const char PROGMEM menuSwitch1[] = "Reproduciendo\n";
+const char PROGMEM menuSwitch2[] = "Reproduccion detenida\n";
+const char PROGMEM menuSwitch3[] = "Ingrese el número de canción a seleccionar: \n";
+const char PROGMEM menuSwitch4[] = "Reiniciando el sistema...\n";
+const char PROGMEM menuSwitch5[] = "Comando no válido\n";
+// Mensaje de bienvenida
+const char PROGMEM bienvenida[] = "Willkommen!\n";
 
-const char PROGMEM menu[6][39] = {
-	"--------------OPCIONES---------------\n",
-	"1. PLAY: Reproducir canción          \n",
-	"2. STOP: Detener reproducción        \n",
-	"3. NUM: Seleccionar número de canción\n",
-	"4. RESET: Reiniciar sistema          \n",
-	"Ingrese el número de opción:         \n"
-};
-void menuInit(void){
-	uint8_t idCancion = 1;
-	bool mostrarBienvenida = false;
-	//const char PROGMEM menu[29] = "1. PLAY: Reproducir canción\n";
-	/*
-	const char PROGMEM menu[6][50] = {
-		"\nOpciones disponibles:\n",
-		"1. PLAY: Reproducir canción\n",
-		"2. STOP: Detener reproducción\n",
-		"3. NUM: Seleccionar número de canción\n",
-		"4. RESET: Reiniciar sistema\n",
-		"Ingrese el número de opción: "
-	};
-	*/
-	/*
-	const char PROGMEM menuSwitch[5][50] = {
-		"Reproduciendo ",
-		"Reproduccion detenida\n",
-		"Ingrese el número de canción a seleccionar: ",
-		"Reiniciando el sistema...\n",
-		"Comando no válido\n"
-	};
-	*/
-}
-void MENU_Update(void){
 
-	if (!mostrarBienvenida) {
-		printSongList();
-		mostrarBienvenida = true;
+void printBienvenida() {
+	//Envia mensaje de bienvenida desde ROM
+	int i = 0;
+	char c;
+	c = pgm_read_byte(bienvenida + i);
+	while(c != '\0'){
+		SerialPort_Send_Data(c);
+		i++;
+		c = pgm_read_byte(bienvenida + i);
+		SerialPort_Wait_For_TX_Buffer_Free();
 	}
-	SerialPort_TX_Interrupt_Enable();
-	for(uint8_t j=0;j<5;j++)
-		for(uint8_t i=0;i<37;i++)
-			UART_Write_Char_To_Buffer(pgm_read_byte(&menu[j][i]));
-	/*
-	UART_Write_String_To_Buffer(pgm_read_byte(&menu[1]));
-	UART_Write_String_To_Buffer(pgm_read_byte(&menu[2]));
-	UART_Write_String_To_Buffer(pgm_read_byte(&menu[3]));
-	UART_Write_String_To_Buffer(pgm_read_byte(&menu[4]));
-	UART_Write_String_To_Buffer(pgm_read_byte(&menu[5]));
-	while (!UART_Get_Char_From_Buffer(opcion));
-	
-	switch (*opcion) {
-		case 1: {
-			memcpy_P(&menuSwitchPtr, &menuSwitch[0], sizeof(PGM_P));
-			UART_Write_String_To_Buffer(menuSwitchPtr);
-			memcpy_P(&songPtr, &songList[idCancion-1], sizeof(PGM_P));
-			play_song(songPtr);
-			break;
-		}
-		case 2: {
-			memcpy_P(&menuSwitchPtr, &menuSwitch[1], sizeof(PGM_P));
-			UART_Write_String_To_Buffer(menuSwitchPtr);
-			break;
-		}
-		case 3: {
-			memcpy_P(&menuSwitchPtr, &menuSwitch[2], sizeof(PGM_P));
-			UART_Write_String_To_Buffer(menuSwitchPtr);
-			while (!UART_Get_Char_From_Buffer(opcion));
-			break;
-		}
-		case 4: {
-			memcpy_P(&menuSwitchPtr, &menuSwitch[3], sizeof(PGM_P));
-			UART_Write_String_To_Buffer(menuSwitchPtr);
-			mostrarBienvenida = false;
-			idCancion = 0;
-			break;
-		}
-		default:
-		memcpy_P(&menuSwitchPtr, &menuSwitch[4], sizeof(PGM_P));
-		UART_Write_String_To_Buffer(menuSwitchPtr);
+	//Muestra la cantidad de canciones
+	SerialPort_Send_String("Número de canciones almacenadas: ");
+	SerialPort_Wait_For_TX_Buffer_Free();
+	SerialPort_Send_Data('0' + CANCIONES);
+	SerialPort_Wait_For_TX_Buffer_Free();
+	SerialPort_Send_Data('\n');
+}
+
+
+void printMenu(){
+	//Muestra Menu en consola desde ROM
+	int i = 0;
+	char c;
+	c = pgm_read_byte(menu + i);
+	while(c != '\0'){
+		SerialPort_Send_Data(c);
+		i++;
+		c = pgm_read_byte(menu + i);
+		SerialPort_Wait_For_TX_Buffer_Free();
+	}
+}
+
+void opcionMenu(char opcion){
+	int i;	char c;
+	switch(opcion){
+		case 'p':
+			if (!sound_playing)
+			{
+				i= 0;
+				c = pgm_read_byte(menuSwitch1 + i);
+				while(c != '\0'){
+					SerialPort_Send_Data(c);
+					i++;
+					c = pgm_read_byte(menuSwitch1 + i);
+					SerialPort_Wait_For_TX_Buffer_Free();
+				}
+				eleccionMenu(theme);
+				
+				SerialPort_Send_String("\n\n\n\n\n ");
+				mostrarMenu=1;
+			}
 		break;
-	}	
-	*/
+		
+		case 's':
+			i= 0;
+			c = pgm_read_byte(menuSwitch2 + i);
+			while(c != '\0'){
+				SerialPort_Send_Data(c);
+				i++;
+				c = pgm_read_byte(menuSwitch2 + i);
+				SerialPort_Wait_For_TX_Buffer_Free();
+			}
+			
+			mostrarMenu=1;
+		break;
+		
+		case 'n':
+			SerialPort_Send_String("\n\n\n\n\n ");
+			printSongList();
+			i= 0;
+			c = pgm_read_byte(menuSwitch3 + i);
+			while(c != '\0'){
+				SerialPort_Send_Data(c);
+				i++;
+				c = pgm_read_byte(menuSwitch3 + i);
+				SerialPort_Wait_For_TX_Buffer_Free();
+			}
+			SerialPort_Wait_Until_New_Data();
+			theme=RX_Buffer;
+			while(theme<='1' || theme>=('0'+CANCIONES)){
+				if(theme<='1' || theme>=('0'+CANCIONES)){
+					SerialPort_Send_String("\nCancion invalida\n");					
+				}
+				SerialPort_Wait_Until_New_Data();
+				theme=RX_Buffer;
+			}
+			mostrarMenu=1;
+			UDR0=0;
+			SerialPort_Send_String("\n\n\n\n\n\n\n\n\n\n\n\n ");
+		break;
+		
+		case 'r':
+			sound_playing = 0;
+			i= 0;
+			c = pgm_read_byte(menuSwitch4 + i);
+			while(c != '\0'){
+				SerialPort_Send_Data(c);
+				i++;
+				c = pgm_read_byte(menuSwitch4 + i);
+				SerialPort_Wait_For_TX_Buffer_Free();
+			}
+			theme='1';
+			mostrarBienvenida=1;
+			mostrarMenu=1;
+			_delay_ms(3000);		
+			SerialPort_Send_String("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n ");
+		break;
+		
+		default:
+			i= 0;
+			c = pgm_read_byte(menuSwitch5 + i);
+			while(c != '\0'){
+				SerialPort_Send_Data(c);
+				i++;
+				c = pgm_read_byte(menuSwitch5 + i);
+				SerialPort_Wait_For_TX_Buffer_Free();
+			}
+		break;
+	}
+	
 }
