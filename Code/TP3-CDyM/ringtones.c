@@ -6,12 +6,13 @@
 #include "avr/pgmspace.h"
 #include "serialPort.h"
 #include "ringtones.h"
+#include "menu.h"
 
 //Lista de nombres de las canciones
                  // el espacio antes del 1 es porque se lo come el buffer
 const char PROGMEM rtttlSongNames[] = {" 1. Megalovania\n2. AllStar\n3. Argentina\n4. Barbie Girl\n5. Doom Theme\n6. I'm Blue\n7. Tetris Theme\n8. Among Us Theme\n"};
 // Colecci?n de m?sica RTTL
-const char PROGMEM rtttl_library1[]="Megalovania:d=16,o=5,b=160:d,d,d6,p,a,8p,g#,p,g,p,f,p,d,f,g,c,c,d6,p,a,8p,g#,p,g,p,f,p,d,f,g,b4,b4,d6,p,a,8p,g#,p,g,p,f,p,d,f,g,a#4,a#4,d6p,a,8p,g#,p,g,p,f,p,d,f,g";
+const char PROGMEM rtttl_library1[]="Megalovania:d=16,o=5,b=120:d,d,d6,p,a,8p,g#,p,g,p,f,p,d,f,g,c,c,d6,p,a,8p,g#,p,g,p,f,p,d,f,g,b4,b4,d6,p,a,8p,g#,p,g,p,f,p,d,f,g,a#4,a#4,d6p,a,8p,g#,p,g,p,f,p,d,f,g";
 const char PROGMEM rtttl_library2[]="AllStar:d=4,o=5,b=40:16g.,32d.6,32b.,16b.,32a.,32g.,32g.,16c.6,32b.,32b.,32a.,32a.,16g.,32g.,32d.6,32b.,32b.,32a.,32a.,32g.,32g.,16e.,d,32g.,32g.,32d.6,32b.,32b.,32a.,32a.,32g.,32g.,16c.6,32b.,32b.,32a.,32a.,32g.,32g.,16d.6,32b.,32b.,16a.,32g.,32g.,16a.,8e";
 const char PROGMEM rtttl_library3[]="Argentina:d=4,o=6,b=80:8g5,8a5,8b5,c,8c.,16e,8d,8c,8b.5,16a5,g.5,8e5,c5,8e.5,16g5,f5,8f.5,16a5,g5,8a.5,16b5,c,8c.5,16c5,8c.5,16c5,8c.5,16d5,e5,8e.5,16e5,8e5,8g5,8f_.5,16a5,a5,g5,p,8g.5,16b5,a5,8a.5,16c,f_5,8f_.5,16a5,g5,p,8p,8g5,8a5,8b5,c,8c.,16e,8d,8c,8b.5,16a5,g5,8f5,8e5,c5,8e.5,16c,f5,8f.5,16a5,g5,8a.5,16b5,c";
 const char PROGMEM rtttl_library4[]="BarbieGirl:d=4,o=5,b=125:32e,32f#,8g#,8e,8g#,8c#6,a,8p,16p,16g#,8f#,8d#,8f#,8b,g#,8f#,8e,p,8e,8c#,f#,c#,p,8f#,8e,g#,f#,16e,16p,16e,16p,8c#4,8b4,16e,16p,16e,16p,8c#4,8b4,b,g#,e,c#4,16e,16p,16e,16p,8c#4,8b4,16e,16p,16e,16p,8c#4,8b4,8p,8c#6,8b,8c#6,8p,8c#6,8b,8c#6";
@@ -28,11 +29,6 @@ const unsigned int note[4][12] =
 	{1047, 1109, 1175, 1244, 1319, 1397, 1480, 1568, 1660, 1760, 1865, 1976}, // 6ta octava
 	{2093, 2218, 2349, 2489, 2637, 2794, 2960, 3136, 3320, 3520, 3728, 3951}  // 7ma octava
 };
-
-unsigned int duration_timer;
-volatile unsigned int sound_playing=0;
-unsigned char duration, octave;
-unsigned int tempo;
 
 // Control de la duraci?n del sonido
 ISR (TIMER0_COMPA_vect) // ISR para la interrupci?n de comparaci?n del Timer 0
@@ -65,90 +61,29 @@ void sound(unsigned int freq, unsigned int dur)
 }
 
 // Esta funci?n reproduce una canci?n que se le pase en un string con formato RTTTL
-void play_song(char *song)
+void play_song()
 {
 	unsigned char temp_duration, temp_octave, current_note, dot_flag;
 	unsigned int calc_duration;
-	duration = 4;                 // Duraci?n est?ndar = 4/4 = 1 beat
-	tempo = 63;                   // Tempo est?ndar = 63 bpm
-	octave = 6;                   // Octava est?ndar = 6th
-	while (*song != ':') song++;  // Busca el primer ':'
-	song++;                       // Saltea el primer ':'
-	while (*song!=':')            // Repite hasta encontrar ':'
-	{
-		if (*song == 'd')           // Entra si es el seteo de la duraci?n
-		{
-			duration = 0;             // Seteo la duraci?n en cero (temporalmente)
-			song++;                   // Avanzo al pr?ximo caracter
-			while (*song == '=') song++;  // Salteo '='
-			while (*song == ' ') song++;  // Salteo los espacios
-			// Si el caracter es un n?mero, seteo la duraci?n
-			if (*song>='0' && *song<='9') duration = *song - '0';
-			song++;                   // Avanzo al pr?ximo caracter
-			// Me fijo si el caracter es un n?mero, ya que la diraci?n puede ser de dos d?gitos de largo
-			if (*song>='0' && *song<='9')
-			{ // Multiplico duraci?n por 10 y le agrego el valor del caracter
-				duration = duration*10 + (*song - '0');
-				song++;                 // Avanzo al pr?ximo caracter
-			}
-			while (*song == ',') song++;  // Salteo ','
-		}
-		
-		if (*song == 'o')           // Entra si es el seteo de la octava
-		{
-			octave = 0;               // Seteo la octava en cero (temporalmente)
-			song++;                   // Avanzo al pr?ximo caracter
-			while (*song == '=') song++;  // Salteo '='
-			while (*song == ' ') song++;  // Salteo los espacios
-			// Si el caracter es un n?mero, seteo la octava
-			if (*song>='0' && *song<='9') octave = *song - '0';
-			song++;                   // Avanzo al pr?ximo caracter
-			while (*song == ',') song++;  // Salteo ','
-		}
-		if (*song == 'b')           // Entra si es el seteo del tempo (beats por minuto)
-		{
-			tempo = 0;                // Seteo el tempo en cero (temporalmente)
-			song++;                   // Avanzo al pr?ximo caracter
-			while (*song == '=') song++;  // Salteo '='
-			while (*song == ' ') song++;  // Salteo los espacios
-			// Ahora leo el seteo del tempo (puede tener 3 d?gitos de largo)
-			if (*song>='0' && *song<='9') tempo = *song - '0';
-			song++;                   // Avanzo al pr?ximo caracter
-			if (*song>='0' && *song<='9')
-			{
-				tempo = tempo*10 + (*song - '0'); // El tempo tiene dos d?gitos
-				song++;                 // Avanzo al pr?ximo caracter
-				if (*song>='0' && *song<='9')
-				{
-					tempo = tempo*10 + (*song - '0'); // El tempo tiene tres d?gitos
-					song++;               // Avanzo al pr?ximo caracter
-				}
-			}
-			while (*song == ',') song++;  // Salteo ','
-		}
-		while (*song == ',') song++;    // Salteo ','
-	}
-	song++;                       // Avanzo al pr?ximo caracter
 	// read the musical notes
-	while (*song)                 // Repito hasta que el caracter sea null
-	{
+	if(menuFlag == REPRODUCIENDO && !sound_playing){
 		current_note = 255;         // Nota por defecto = pausa
 		temp_octave = octave;       // Seteo la octava a la por defecto de la canci?n
 		temp_duration = duration;   // Seteo la duraci?n a la por defecto de la canci?n
 		dot_flag = 0;               // Borro el flag de detecci?n de punto
 		// Busco un prefijo de duraci?n
-		if (*song>='0' && *song<='9')
+		if (cancionRAM[lectorCancion]>='0' && cancionRAM[lectorCancion]<='9')
 		{
-			temp_duration = *song - '0';
-			song++;
-			if (*song>='0' && *song<='9')
+			temp_duration = cancionRAM[lectorCancion] - '0';
+			lectorCancion++;
+			if (cancionRAM[lectorCancion]>='0' && cancionRAM[lectorCancion]<='9')
 			{
-				temp_duration = temp_duration*10 + (*song - '0');
-				song++;
+				temp_duration = temp_duration*10 + (cancionRAM[lectorCancion] - '0');
+				lectorCancion++;
 			}
 		}
 		// Busco una nota
-		switch (*song)
+		switch (cancionRAM[lectorCancion])
 		{
 			case 'c': current_note = 0; break;    // C (do)
 			case 'd': current_note = 2; break;    // D (re)
@@ -159,35 +94,35 @@ void play_song(char *song)
 			case 'b': current_note = 11; break;   // B (si)
 			case 'p': current_note = 255; break;  // pausa
 		}
-		song++;                     // Avanzo al pr?ximo caracter
+		lectorCancion++;                     // Avanzo al pr?ximo caracter
 		// Busco un '#' siguiendo la nota
-		if (*song=='#')
+		if (cancionRAM[lectorCancion]=='#')
 		{
 			current_note++;   // Incremento la nota (A->A#, C->C#, D->D#, F->F#, G->G#)
-			song++;                   // Avanzo al pr?ximo caracter
+			lectorCancion++;                   // Avanzo al pr?ximo caracter
 		}
 
 
 
 
 		// Busco '.' (extiende la duraci?n de la nota un 50%)
-		if (*song=='.')
+		if (cancionRAM[lectorCancion]=='.')
 		{
 			dot_flag = 1;             // Si se encuentra '.', seteo el flag
-			song++;                   // Avanzo al pr?ximo caracter
+			lectorCancion++;                   // Avanzo al pr?ximo caracter
 		}
 		// Busco un sufijo de una octava
-		if (*song>='0' && *song<='9')
+		if (cancionRAM[lectorCancion]>='0' && cancionRAM[lectorCancion]<='9')
 		{
-			temp_octave = *song - '0';// Seteo la octava en consecuencia
-			song++;                   // Avanzo al pr?ximo caracter
+			temp_octave = cancionRAM[lectorCancion] - '0';// Seteo la octava en consecuencia
+			lectorCancion++;                   // Avanzo al pr?ximo caracter
 		}
-		if (*song=='.') // Un punto puede ser encontrado incluso despu?s de una octava
+		if (cancionRAM[lectorCancion]=='.') // Un punto puede ser encontrado incluso despu?s de una octava
 		{
 			dot_flag = 1;             // Si se encuentra '.', seteo el flag
-			song++;                   // Avanzo al pr?ximo caracter
+			lectorCancion++;                   // Avanzo al pr?ximo caracter
 		}
-		while (*song == ',') song++;    // Salteo ','
+		while (cancionRAM[lectorCancion] == ',') lectorCancion++;    // Salteo ','
 		// Calculo la duraci?n de la nota
 		calc_duration = (60000/tempo)/(temp_duration);
 		calc_duration *= 4;         // La nota completa tiene cuatro beats
@@ -200,7 +135,75 @@ void play_song(char *song)
 			duration_timer = calc_duration;
 			sound_playing = 1;
 		}
-		while (sound_playing);      // Espero a la que nota/pausa en curso finalice
+		if(!cancionRAM[lectorCancion]){
+			menuFlag=STOP;
+		}
+	}else{
+		if(menuFlag == CARGANDO){
+			while (cancionRAM[lectorCancion] != ':') {
+				lectorCancion++;  // Busca el primer ':'
+				}
+			lectorCancion++;     // Saltea el primer ':'
+			while (cancionRAM[lectorCancion]!=':')            // Repite hasta encontrar ':'
+			{
+				if (cancionRAM[lectorCancion] == 'd')           // Entra si es el seteo de la duraci?n
+				{
+					duration = 0;             // Seteo la duraci?n en cero (temporalmente)
+					lectorCancion++;                   // Avanzo al pr?ximo caracter
+					while (cancionRAM[lectorCancion] == '=') { 
+						lectorCancion++;  // Salteo '='
+						}
+					while (cancionRAM[lectorCancion] == ' ') {lectorCancion++; } // Salteo los espacios
+					// Si el caracter es un n?mero, seteo la duraci?n
+					if (cancionRAM[lectorCancion]>='0' && cancionRAM[lectorCancion]<='9') duration = cancionRAM[lectorCancion] - '0';
+					lectorCancion++;                   // Avanzo al pr?ximo caracter
+					// Me fijo si el caracter es un n?mero, ya que la diraci?n puede ser de dos d?gitos de largo
+					if (cancionRAM[lectorCancion]>='0' && cancionRAM[lectorCancion]<='9')
+					{ // Multiplico duraci?n por 10 y le agrego el valor del caracter
+						duration = duration*10 + (cancionRAM[lectorCancion] - '0');
+						lectorCancion++;                 // Avanzo al pr?ximo caracter
+					}
+					while (cancionRAM[lectorCancion] == ',') lectorCancion++;  // Salteo ','
+				}
+		
+				if (cancionRAM[lectorCancion] == 'o')           // Entra si es el seteo de la octava
+				{
+					octave = 0;               // Seteo la octava en cero (temporalmente)
+					lectorCancion++;                   // Avanzo al pr?ximo caracter
+					while (cancionRAM[lectorCancion] == '=') lectorCancion++;  // Salteo '='
+					while (cancionRAM[lectorCancion] == ' ') lectorCancion++;  // Salteo los espacios
+					// Si el caracter es un n?mero, seteo la octava
+					if (cancionRAM[lectorCancion]>='0' && cancionRAM[lectorCancion]<='9') octave = cancionRAM[lectorCancion] - '0';
+					lectorCancion++;                   // Avanzo al pr?ximo caracter
+					while (cancionRAM[lectorCancion] == ',') lectorCancion++;  // Salteo ','
+				}
+				if (cancionRAM[lectorCancion] == 'b')           // Entra si es el seteo del tempo (beats por minuto)
+				{
+					tempo = 0;                // Seteo el tempo en cero (temporalmente)
+					lectorCancion++;                   // Avanzo al pr?ximo caracter
+					while (cancionRAM[lectorCancion] == '=') lectorCancion++;  // Salteo '='
+					while (cancionRAM[lectorCancion] == ' ') lectorCancion++;  // Salteo los espacios
+					// Ahora leo el seteo del tempo (puede tener 3 d?gitos de largo)
+					if (cancionRAM[lectorCancion]>='0' && cancionRAM[lectorCancion]<='9') tempo = cancionRAM[lectorCancion] - '0';
+					lectorCancion++;                   // Avanzo al pr?ximo caracter
+					if (cancionRAM[lectorCancion]>='0' && cancionRAM[lectorCancion]<='9')
+					{
+						tempo = tempo*10 + (cancionRAM[lectorCancion] - '0'); // El tempo tiene dos d?gitos
+						lectorCancion++;                 // Avanzo al pr?ximo caracter
+						if (cancionRAM[lectorCancion]>='0' && cancionRAM[lectorCancion]<='9')
+						{
+							tempo = tempo*10 + (cancionRAM[lectorCancion] - '0'); // El tempo tiene tres d?gitos
+							lectorCancion++;               // Avanzo al pr?ximo caracter
+						}
+					}
+					while (cancionRAM[lectorCancion] == ',') lectorCancion++;  // Salteo ','
+				}
+				while (cancionRAM[lectorCancion] == ',') lectorCancion++;    // Salteo ','
+			}
+			lectorCancion++;                       // Avanzo al pr?ximo caracter
+			menuFlag = REPRODUCIR;
+			
+		}
 	}
 }
 
@@ -217,17 +220,19 @@ void reproducir(const char* flashAddress)
 		c = pgm_read_byte_near(flashAddress + i);
 	}
 	// Creo el array en RAM con el tamano necesario
-	char* songRamArray = (char*)malloc(lenght * sizeof(char));
+	cancionRAM = (char*)malloc(lenght * sizeof(char));
 	// Cargo la cancion en RAM
 	for (i = 0; i < lenght - 1; i++) {
 		c = pgm_read_byte_near(flashAddress + i);
-		songRamArray[i] = c;
+		cancionRAM[i] = c;
 	}
-	songRamArray[i] = '\0';
-	
-	play_song(songRamArray);
-	
-	free(songRamArray);
+	cancionRAM[i] = '\0';
+	lectorCancion=0;
+	sound_playing=0;
+	duration = 4;                 // Duraci?n est?ndar = 4/4 = 1 beat
+	tempo = 63;                   // Tempo est?ndar = 63 bpm
+	octave = 6;                   // Octava est?ndar = 6th
+	play_song();
 }
 
 void printSongList(){

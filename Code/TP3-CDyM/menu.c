@@ -11,15 +11,19 @@
 #include "menu.h"
 
 //Menu
-const char PROGMEM menu[] = "\nOpciones disponibles:\np. PLAY: Reproducir canción\ns. STOP: Detener reproducción\nn. NUM: Seleccionar número de canción\nr. RESET: Reiniciar sistema\nIngrese el número de opción: \n";
+const char PROGMEM menu[] = "\n Opciones disponibles:\np. PLAY: Reproducir canción\ns. STOP: Detener reproducción\nn. NUM: Seleccionar número de canción\nr. RESET: Reiniciar sistema\nIngrese el número de opción: \n ";
 //Feedback
-const char PROGMEM menuSwitch1[] = "Reproduciendo\n";
-const char PROGMEM menuSwitch2[] = "Reproduccion detenida\n";
-const char PROGMEM menuSwitch3[] = "Ingrese el número de canción a seleccionar: \n";
+const char PROGMEM menuSwitch1[] = "Reproduciendo\n ";
+const char PROGMEM menuSwitch2[] = "Reproduccion detenida\n ";
+const char PROGMEM menuSwitch3[] = "Ingrese el número de canción a seleccionar: \n ";
 const char PROGMEM menuSwitch4[] = "Reiniciando el sistema...\n";
-const char PROGMEM menuSwitch5[] = "Comando no válido\n";
+const char PROGMEM menuSwitch5[] = "Comando no válido\n ";
+const char PROGMEM menuSwitch6[] = "Cargando\n ";
 // Mensaje de bienvenida
-const char PROGMEM bienvenida[] = "Willkommen!\n";
+const char PROGMEM bienvenida[] = "Willkommen!\n ";
+
+int i = 0;
+char c;
 
 
 void printBienvenida() {
@@ -44,8 +48,6 @@ void printBienvenida() {
 
 void printMenu(){
 	//Muestra Menu en consola desde ROM
-	int i = 0;
-	char c;
 	c = pgm_read_byte(menu + i);
 	while(c != '\0'){
 		SerialPort_Send_Data(c);
@@ -56,21 +58,21 @@ void printMenu(){
 }
 
 void opcionMenu(char opcion){
-	int i;	char c;
 	switch(opcion){
 		case 'p':
-			if (!sound_playing)
+			if (menuFlag != CARGANDO)
 			{
+				lectorCancion = 0;
 				i= 0;
-				c = pgm_read_byte(menuSwitch1 + i);
+				c = pgm_read_byte(menuSwitch6 + i);
 				while(c != '\0'){
 					SerialPort_Send_Data(c);
 					i++;
-					c = pgm_read_byte(menuSwitch1 + i);
+					c = pgm_read_byte(menuSwitch6 + i);
 					SerialPort_Wait_For_TX_Buffer_Free();
 				}
+				menuFlag = CARGANDO;
 				eleccionMenu(theme);
-				mostrarMenu=1;
 			}
 		break;
 		
@@ -83,11 +85,11 @@ void opcionMenu(char opcion){
 				c = pgm_read_byte(menuSwitch2 + i);
 				SerialPort_Wait_For_TX_Buffer_Free();
 			}
-			
-			mostrarMenu=1;
+			menuFlag = STOP;
 		break;
 		
 		case 'n':
+			free(cancionRAM);
 			printSongList();
 			i= 0;
 			c = pgm_read_byte(menuSwitch3 + i);
@@ -97,17 +99,8 @@ void opcionMenu(char opcion){
 				c = pgm_read_byte(menuSwitch3 + i);
 				SerialPort_Wait_For_TX_Buffer_Free();
 			}
-			SerialPort_Wait_Until_New_Data();
-			theme=RX_Buffer;
-			while(theme<='1' || theme>=('0'+CANCIONES)){
-				if(theme<='1' || theme>=('0'+CANCIONES)){
-					SerialPort_Send_String("\nCancion invalida\n");					
-				}
-				SerialPort_Wait_Until_New_Data();
-				theme=RX_Buffer;
-			}
-			mostrarMenu=1;
-			UDR0=0;
+			menuFlag=SELECCIONANDO;
+			RX_Buffer=0;
 		break;
 		
 		case 'r':
@@ -120,10 +113,7 @@ void opcionMenu(char opcion){
 				c = pgm_read_byte(menuSwitch4 + i);
 				SerialPort_Wait_For_TX_Buffer_Free();
 			}
-			theme='1';
-			mostrarBienvenida=1;
-			mostrarMenu=1;
-			_delay_ms(3000);		
+			menuFlag=RESET;		
 		break;
 		
 		default:
@@ -138,4 +128,54 @@ void opcionMenu(char opcion){
 		break;
 	}
 	
+}
+
+void menuMef(){
+	switch (menuFlag){
+		case REPRODUCIR:
+			i= 0;
+			c = pgm_read_byte(menuSwitch1 + i);
+			while(c != '\0'){
+				SerialPort_Send_Data(c);
+				i++;
+				c = pgm_read_byte(menuSwitch1 + i);
+				SerialPort_Wait_For_TX_Buffer_Free();
+			}
+			menuFlag = REPRODUCIENDO;
+		break;
+		case REPRODUCIENDO:
+			play_song();
+		break;
+		case CARGANDO:
+			play_song();
+		break;
+		case STOP:
+			mostrarMenu=1;
+			free(cancionRAM);
+			menuFlag = SILENCIO;
+		break;
+		case SELECCIONANDO:
+			if(RX_Buffer){
+				if(RX_Buffer<'1' || RX_Buffer>('0'+CANCIONES)){
+					SerialPort_Send_String("\nCancion invalida\n");
+				}else{
+					theme=RX_Buffer;
+					mostrarMenu=1;	
+					menuFlag = SILENCIO;		
+				}
+			RX_Buffer=0;
+			}
+		break;
+		case SILENCIO:
+			mostrarMenu=0;
+		break;
+		case RESET:
+			free(cancionRAM);
+			theme='1';
+			mostrarBienvenida=1;
+			mostrarMenu=1;
+			_delay_ms(1000);
+			menuFlag = SILENCIO;
+		break;
+	}
 }

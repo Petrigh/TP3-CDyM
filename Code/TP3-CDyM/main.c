@@ -13,9 +13,10 @@
 	 
 	 //comunicación con la ISR
 	 RX_Buffer=0;
-	 theme=1;
+	 theme='1';
 	 mostrarMenu= 1;
 	 mostrarBienvenida=1;
+	 menuFlag = SILENCIO;
 	 // ------------------------ Timer 0 ------------------------
 	 
 	 // Configuro una interrupci?n cada 1 mseg
@@ -47,10 +48,11 @@
 			 printMenu();		//Imprimo opciones
 			 mostrarMenu = 0;
 		 }
-		 if(RX_Buffer){ // recepción NO Bloqueante
+		 if(RX_Buffer && menuFlag!=SELECCIONANDO){ // recepción NO Bloqueante
 			 opcionMenu(RX_Buffer);
 			 RX_Buffer=0;
 		 }
+		 menuMef();
 	 }
 	 return 0;
  }
