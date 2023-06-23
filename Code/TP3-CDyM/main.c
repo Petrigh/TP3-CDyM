@@ -12,7 +12,8 @@
  {
 	 
 	 //comunicación con la ISR
-	 RX_Buffer=0;
+	 RX_Buffer_overflow_flag=0;
+	 RX_Buffer_flag = 0;
 	 theme='1';
 	 mostrarMenu= 1;
 	 mostrarBienvenida=1;
@@ -48,9 +49,14 @@
 			 printMenu();		//Imprimo opciones
 			 mostrarMenu = 0;
 		 }
-		 if(RX_Buffer && menuFlag!=SELECCIONANDO){ // recepción NO Bloqueante
-			 opcionMenu(RX_Buffer);
-			 RX_Buffer=0;
+		 if(RX_Buffer_flag && menuFlag!=SELECCIONANDO){ // recepción NO Bloqueante
+			 if(!RX_Buffer_overflow_flag){
+				 opcionMenu(RX_Buffer);
+				 RX_Buffer_flag=0;
+			 }else{
+				RX_Buffer_overflow_flag=0;
+				SerialPort_Send_String("\nOverflow en comando\n ");
+			 }
 		 }
 		 menuMef();
 	 }
@@ -59,5 +65,18 @@
 
  // Rutina de Servicio de Interrupción de Byte Recibido
  ISR(USART_RX_vect){
-	 RX_Buffer = UDR0; //la lectura del UDR borra flag RXC
+	char receivedChar = UDR0;
+	
+	if (RX_Buffer_Index < MAX_BUFFER_SIZE - 1) {
+		RX_Buffer[MAX_BUFFER_SIZE] = receivedChar;
+		RX_Buffer_Index++;
+	}else{
+		RX_Buffer_overflow_flag=1;
+	}
+	
+	if (receivedChar == '\r') {
+		RX_Buffer[MAX_BUFFER_SIZE] = '\0';
+		RX_Buffer_flag = 1;
+		RX_Buffer_Index = 0;
+	}
  }

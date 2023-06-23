@@ -16,7 +16,13 @@
 	// Interrupciones del Microcontrolador
 	#include <avr/interrupt.h>
 	
-	volatile char RX_Buffer;
+	#define MAX_BUFFER_SIZE 6 // maximo tamano del buffer
+	
+	char RX_Buffer[MAX_BUFFER_SIZE]; // Buffer
+	uint8_t RX_Buffer_Index; // Indice del vector
+
+	uint8_t RX_Buffer_flag; //flag de string recibido
+	uint8_t RX_Buffer_overflow_flag; //flag de overflow 
 	// -------- Prototipos de funciones Publicas ---------------
 	
 	// Inicializacion de Puerto Serie

@@ -24,6 +24,7 @@ const char PROGMEM bienvenida[] = "Willkommen!\n ";
 
 int i = 0;
 char c;
+int num;
 
 
 void printBienvenida() {
@@ -57,9 +58,11 @@ void printMenu(){
 	}
 }
 
-void opcionMenu(char opcion){
-	switch(opcion){
-		case 'p':
+void opcionMenu(char* opcion){
+	
+	SerialPort_Send_String(opcion);
+	if (strcmp(opcion, "PLAY") == 0) {
+			
 			if (menuFlag != CARGANDO)
 			{
 				lectorCancion = 0;
@@ -74,9 +77,7 @@ void opcionMenu(char opcion){
 				menuFlag = CARGANDO;
 				eleccionMenu(theme);
 			}
-		break;
-		
-		case 's':
+		} else if (strcmp(opcion, "STOP") == 0) {
 			i= 0;
 			c = pgm_read_byte(menuSwitch2 + i);
 			while(c != '\0'){
@@ -86,9 +87,7 @@ void opcionMenu(char opcion){
 				SerialPort_Wait_For_TX_Buffer_Free();
 			}
 			menuFlag = STOP;
-		break;
-		
-		case 'n':
+		} else if (strcmp(opcion, "NUM") == 0) {
 			free(cancionRAM);
 			printSongList();
 			i= 0;
@@ -100,10 +99,7 @@ void opcionMenu(char opcion){
 				SerialPort_Wait_For_TX_Buffer_Free();
 			}
 			menuFlag=SELECCIONANDO;
-			RX_Buffer=0;
-		break;
-		
-		case 'r':
+		} else if (strcmp(opcion, "RESET") == 0) {
 			sound_playing = 0;
 			i= 0;
 			c = pgm_read_byte(menuSwitch4 + i);
@@ -113,10 +109,8 @@ void opcionMenu(char opcion){
 				c = pgm_read_byte(menuSwitch4 + i);
 				SerialPort_Wait_For_TX_Buffer_Free();
 			}
-			menuFlag=RESET;		
-		break;
-		
-		default:
+			menuFlag=RESET;
+		} else {
 			i= 0;
 			c = pgm_read_byte(menuSwitch5 + i);
 			while(c != '\0'){
@@ -124,10 +118,8 @@ void opcionMenu(char opcion){
 				i++;
 				c = pgm_read_byte(menuSwitch5 + i);
 				SerialPort_Wait_For_TX_Buffer_Free();
-			}
-		break;
+		}
 	}
-	
 }
 
 void menuMef(){
@@ -154,16 +146,14 @@ void menuMef(){
 			free(cancionRAM);
 			menuFlag = SILENCIO;
 		break;
-		case SELECCIONANDO:
-			if(RX_Buffer){
-				if(RX_Buffer<'1' || RX_Buffer>('0'+CANCIONES)){
-					SerialPort_Send_String("\nCancion invalida\n");
+		case SELECCIONANDO:		
+			num = atoi(RX_Buffer);
+			if(num<1 || num>CANCIONES){
+				SerialPort_Send_String("\nCancion invalida\n");
 				}else{
-					theme=RX_Buffer;
-					mostrarMenu=1;	
-					menuFlag = SILENCIO;		
-				}
-			RX_Buffer=0;
+				theme=num;
+				mostrarMenu=1;
+				menuFlag = SILENCIO;
 			}
 		break;
 		case SILENCIO:
