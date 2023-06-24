@@ -11,7 +11,7 @@ uint8_t themeBool;
 
 void printBienvenida(void);
 void printMenu(void);
-void opcionMenu(char*);
+void opcionMenu(char);
 void menuMef(void);
 
 

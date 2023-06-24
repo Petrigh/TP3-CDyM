@@ -10,7 +10,7 @@
 
 //Lista de nombres de las canciones
                  // el espacio antes del 1 es porque se lo come el buffer
-const char PROGMEM rtttlSongNames[] = {" 1. Megalovania\n2. AllStar\n3. Argentina\n4. Barbie Girl\n5. Doom Theme\n6. I'm Blue\n7. Tetris Theme\n8. Among Us Theme\n"};
+const char PROGMEM rtttlSongNames[] = {" 1. Megalovania\n 2. AllStar\n 3. Argentina\n 4. Barbie Girl\n 5. Doom Theme\n 6. I'm Blue\n 7. Tetris Theme\n 8. Among Us Theme\n "};
 // Colecci?n de m?sica RTTL
 const char PROGMEM rtttl_library1[]="Megalovania:d=16,o=5,b=120:d,d,d6,p,a,8p,g#,p,g,p,f,p,d,f,g,c,c,d6,p,a,8p,g#,p,g,p,f,p,d,f,g,b4,b4,d6,p,a,8p,g#,p,g,p,f,p,d,f,g,a#4,a#4,d6p,a,8p,g#,p,g,p,f,p,d,f,g";
 const char PROGMEM rtttl_library2[]="AllStar:d=4,o=5,b=40:16g.,32d.6,32b.,16b.,32a.,32g.,32g.,16c.6,32b.,32b.,32a.,32a.,16g.,32g.,32d.6,32b.,32b.,32a.,32a.,32g.,32g.,16e.,d,32g.,32g.,32d.6,32b.,32b.,32a.,32a.,32g.,32g.,16c.6,32b.,32b.,32a.,32a.,32g.,32g.,16d.6,32b.,32b.,16a.,32g.,32g.,16a.,8e";
@@ -275,6 +275,7 @@ void eleccionMenu(char opcion){
 		break;
 		default:
 			SerialPort_Send_String("Opcion invalida");
+			menuFlag=STOP;
 		break;
 	}
 }

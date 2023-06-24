@@ -11,16 +11,16 @@
 #include "menu.h"
 
 //Menu
-const char PROGMEM menu[] = "\n Opciones disponibles:\np. PLAY: Reproducir canción\ns. STOP: Detener reproducción\nn. NUM: Seleccionar número de canción\nr. RESET: Reiniciar sistema\nIngrese el número de opción: \n ";
+const char PROGMEM menu[] = "\n\nOpciones disponibles:\n PLAY: Reproducir canción\n STOP: Detener reproducción\n NUM: Seleccionar número de canción\n RESET: Reiniciar sistema\nIngrese el número de opción: \n ";
 //Feedback
 const char PROGMEM menuSwitch1[] = "Reproduciendo\n ";
 const char PROGMEM menuSwitch2[] = "Reproduccion detenida\n ";
-const char PROGMEM menuSwitch3[] = "Ingrese el número de canción a seleccionar: \n ";
+const char PROGMEM menuSwitch3[] = "Ingrese el número de canción a seleccionar: ";
 const char PROGMEM menuSwitch4[] = "Reiniciando el sistema...\n";
 const char PROGMEM menuSwitch5[] = "Comando no válido\n ";
 const char PROGMEM menuSwitch6[] = "Cargando\n ";
 // Mensaje de bienvenida
-const char PROGMEM bienvenida[] = "Willkommen!\n ";
+const char PROGMEM bienvenida[] = "Willkommen!\n";
 
 int i = 0;
 char c;
@@ -31,6 +31,7 @@ void printBienvenida() {
 	//Envia mensaje de bienvenida desde ROM
 	int i = 0;
 	char c;
+	SerialPort_Wait_For_TX_Buffer_Free();
 	c = pgm_read_byte(bienvenida + i);
 	while(c != '\0'){
 		SerialPort_Send_Data(c);
@@ -50,6 +51,7 @@ void printBienvenida() {
 void printMenu(){
 	//Muestra Menu en consola desde ROM
 	c = pgm_read_byte(menu + i);
+	SerialPort_Wait_For_TX_Buffer_Free();
 	while(c != '\0'){
 		SerialPort_Send_Data(c);
 		i++;
@@ -58,11 +60,9 @@ void printMenu(){
 	}
 }
 
-void opcionMenu(char* opcion){
-	
-	SerialPort_Send_String(opcion);
-	if (strcmp(opcion, "PLAY") == 0) {
-			
+void opcionMenu(char opcion){
+	switch(opcion){
+		case 'p':		
 			if (menuFlag != CARGANDO)
 			{
 				lectorCancion = 0;
@@ -77,7 +77,8 @@ void opcionMenu(char* opcion){
 				menuFlag = CARGANDO;
 				eleccionMenu(theme);
 			}
-		} else if (strcmp(opcion, "STOP") == 0) {
+		break;
+		case 's':
 			i= 0;
 			c = pgm_read_byte(menuSwitch2 + i);
 			while(c != '\0'){
@@ -87,7 +88,8 @@ void opcionMenu(char* opcion){
 				SerialPort_Wait_For_TX_Buffer_Free();
 			}
 			menuFlag = STOP;
-		} else if (strcmp(opcion, "NUM") == 0) {
+		break;
+		case 'n':
 			free(cancionRAM);
 			printSongList();
 			i= 0;
@@ -99,7 +101,8 @@ void opcionMenu(char* opcion){
 				SerialPort_Wait_For_TX_Buffer_Free();
 			}
 			menuFlag=SELECCIONANDO;
-		} else if (strcmp(opcion, "RESET") == 0) {
+		break;
+		case 'r':
 			sound_playing = 0;
 			i= 0;
 			c = pgm_read_byte(menuSwitch4 + i);
@@ -110,7 +113,8 @@ void opcionMenu(char* opcion){
 				SerialPort_Wait_For_TX_Buffer_Free();
 			}
 			menuFlag=RESET;
-		} else {
+		break;
+		default:
 			i= 0;
 			c = pgm_read_byte(menuSwitch5 + i);
 			while(c != '\0'){
@@ -118,7 +122,9 @@ void opcionMenu(char* opcion){
 				i++;
 				c = pgm_read_byte(menuSwitch5 + i);
 				SerialPort_Wait_For_TX_Buffer_Free();
-		}
+			}
+			menuFlag = SILENCIO;
+		break;
 	}
 }
 
@@ -146,18 +152,31 @@ void menuMef(){
 			free(cancionRAM);
 			menuFlag = SILENCIO;
 		break;
-		case SELECCIONANDO:		
-			num = atoi(RX_Buffer);
-			if(num<1 || num>CANCIONES){
-				SerialPort_Send_String("\nCancion invalida\n");
+		case SELECCIONANDO:	
+			if(RX_Buffer_flag){ // recepción NO Bloqueante
+				if(!RX_Buffer_overflow_flag){
+					SerialPort_Send_String(RX_Buffer);
+					if(RX_Buffer[1]=='\r'){
+						if(RX_Buffer[0]<'1' || RX_Buffer[0]>'0'+CANCIONES){
+							SerialPort_Send_String("\nCancion invalida\n");
+						}else{
+							theme=RX_Buffer[0];
+							mostrarMenu=1;
+							menuFlag = SILENCIO;
+						}
+					}
+					RX_Buffer_flag=0;
 				}else{
-				theme=num;
-				mostrarMenu=1;
-				menuFlag = SILENCIO;
+					RX_Buffer_overflow_flag=0;
+					RX_Buffer_flag=0;
+					SerialPort_Send_String("\nCancion invalida\n");
+				}
+				SerialPort_Wait_For_TX_Buffer_Free();
 			}
 		break;
 		case SILENCIO:
 			mostrarMenu=0;
+			mostrarBienvenida=0;
 		break;
 		case RESET:
 			free(cancionRAM);
