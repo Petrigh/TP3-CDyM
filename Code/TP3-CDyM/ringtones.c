@@ -1,4 +1,6 @@
+#define F_CPU 16000000UL		// 16 MHz
 //#include "main.h"
+#include <util/delay.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <avr/io.h>
@@ -209,6 +211,7 @@ void play_song()
 
 void reproducir(const char* flashAddress)
 {
+	
 	int lenght = 2;
 	int i = 0;
 	char c;
@@ -219,20 +222,30 @@ void reproducir(const char* flashAddress)
 		i++;
 		c = pgm_read_byte_near(flashAddress + i);
 	}
+	if(cancionRAM!=NULL){
+		free(cancionRAM);
+	}
 	// Creo el array en RAM con el tamano necesario
 	cancionRAM = (char*)malloc(lenght * sizeof(char));
-	// Cargo la cancion en RAM
-	for (i = 0; i < lenght - 1; i++) {
-		c = pgm_read_byte_near(flashAddress + i);
-		cancionRAM[i] = c;
+	if(cancionRAM!=NULL){
+		// Cargo la cancion en RAM
+		for (i = 0; i < lenght ; i++) {
+			c = pgm_read_byte_near(flashAddress + i);
+			cancionRAM[i] = c;
+		}
+		cancionRAM[i] = '\0';
+		lectorCancion=0;
+		sound_playing=0;
+		duration = 4;                 // Duraci?n est?ndar = 4/4 = 1 beat
+		tempo = 63;                   // Tempo est?ndar = 63 bpm
+		octave = 6;                   // Octava est?ndar = 6th
+		play_song();
+	}else{
+		SerialPort_Wait_For_TX_Buffer_Free();
+		SerialPort_Send_String("Error al cargar cancion\n ");
+		SerialPort_Wait_For_TX_Buffer_Free();
+		menuFlag = STOP;
 	}
-	cancionRAM[i] = '\0';
-	lectorCancion=0;
-	sound_playing=0;
-	duration = 4;                 // Duraci?n est?ndar = 4/4 = 1 beat
-	tempo = 63;                   // Tempo est?ndar = 63 bpm
-	octave = 6;                   // Octava est?ndar = 6th
-	play_song();
 }
 
 void printSongList(){

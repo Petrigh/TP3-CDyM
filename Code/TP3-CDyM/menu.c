@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <avr/io.h>
+#include <avr/wdt.h>
 #include <avr/interrupt.h>
 #include <util/delay.h>
 #include "avr/pgmspace.h"
@@ -23,6 +24,7 @@ const char PROGMEM menuSwitch6[] = "Cargando\n ";
 const char PROGMEM bienvenida[] = "Willkommen!\n";
 
 int i = 0;
+
 char c;
 int num;
 
@@ -123,7 +125,6 @@ void opcionMenu(char opcion){
 				c = pgm_read_byte(menuSwitch5 + i);
 				SerialPort_Wait_For_TX_Buffer_Free();
 			}
-			menuFlag = SILENCIO;
 		break;
 	}
 }
@@ -149,7 +150,6 @@ void menuMef(){
 		break;
 		case STOP:
 			mostrarMenu=1;
-			free(cancionRAM);
 			menuFlag = SILENCIO;
 		break;
 		case SELECCIONANDO:	
@@ -179,12 +179,8 @@ void menuMef(){
 			mostrarBienvenida=0;
 		break;
 		case RESET:
-			free(cancionRAM);
-			theme='1';
-			mostrarBienvenida=1;
-			mostrarMenu=1;
-			_delay_ms(1000);
-			menuFlag = SILENCIO;
+			_delay_ms(500);
+			wdt_enable(WDTO_15MS);
 		break;
 	}
 }
